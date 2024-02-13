@@ -12,10 +12,16 @@ router = APIRouter(
 )
 
 
-@router.get('/get-summoner', response_model=str)
-async def get_summoner_puuid(summoner: str, service: SummonerService = Depends()):
-    result = service.get_summoner_puuid(summoner=summoner)
+# @router.get('/get-summoner', response_model=str)
+# async def get_summoner_puuid(summoner: str, service: SummonerService = Depends()):
+#     result = service.get_summoner_puuid(summoner=summoner)
+#     return result
+
+@router.get('/get-puuid{summoner_name_and_tagline}')
+async def get_summoner_puuid(summoner_and_tagline: str, service: SummonerService = Depends()):
+    result = service.get_summoner_puuid(summoner_and_tagline = summoner_and_tagline)
     return result
+
 
 @router.get('/get-matchid') #puuid -> matchid list return
 async def get_summoner_matchid(summoner_puuid:str, service: SummonerService=Depends()):

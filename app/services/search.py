@@ -8,8 +8,11 @@ class SummonerService():
     def __init__(self, repository: SummonerRepository = Depends()) -> None:
         self.repository = repository
 
-    def get_summoner_puuid(self, summoner:str) -> str:
-        summoner_puuid = self.repository.get_summoner_puuid(summoner_name = summoner)
+    def get_summoner_puuid(self, summoner_and_tagline:str) -> str:
+        sharp = summoner_and_tagline.find('#')
+        summoner_name = summoner_and_tagline[:sharp]
+        tagline = summoner_and_tagline[sharp+1:]
+        summoner_puuid = self.repository.get_summoner_puuid(summoner_name = summoner_name, tagline = tagline)
         return summoner_puuid
     
     def get_players_match(self, summoner: str) -> list:

@@ -24,12 +24,12 @@ class SummonerRepository():
     def __init__(self) -> None:
         self.db = db
 
-    def get_summoner_puuid(self, summoner_name: str) -> str: #player_name -> player의 계정 정보 return
-        summoner = summoner_name
+    def get_summoner_puuid(self, summoner_name: str, tagline: str) -> str: #player_name -> player의 계정 정보 return
         #del계정
+        summoner = summoner_name
         if summoner[8:] != 'del':
             summoner = summoner.replace('','%20')
-        request_url = f'https://kr.api.riotgames.com/lol/summoner/v4/summoners/by-name/{summoner}'
+        request_url = f'https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{summoner}/{tagline}'
         result = requests.get(request_url, headers=headers)
         result.raise_for_status()
         summoner_account = result.json()
@@ -83,11 +83,14 @@ class SummonerRepository():
         
     def check_match_in_db(self, match_id: str):
         collection_name = self.db['match']
-        result = collection_name.find({'matchId': match_id})
-        if result.count()>0:
-            return True
+
+        if collection_name.find_one({'matchId': match_id}):
+            return {'success': True}
+
         else:
-            return False
+            # 데이터베이스 연결이 정상적으로 이루어지지 않은 경우를 처리합니다.
+            print("Database connection failed.")
+            return {'success': False}
 
     def get_summoner_from_db(self, match_id: str, puuid: str):
         collection_name = self.db[puuid]
