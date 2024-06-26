@@ -7,16 +7,17 @@ from models.search import MatchInfoBase, SummonerBase
 from dotenv import load_dotenv
 import os
 
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 apikey = os.environ["API_KEY"]
-
+print(apikey)
 
 headers = {
     "User-Agent": os.environ["USER_AGENT"],
     "Accept-Language": os.environ["ACCEPT_LANGUAGE"],
     "Accept-Charset": os.environ["ACCEPT_CHARSET"],
-    "Origin": os.environ["ORIGIN"], 
-    "X-Riot-Token": apikey,
+    "Origin": os.environ["ORIGIN"],
+    "X-Riot-Token": apikey
 }
 
 class SummonerRepository():
@@ -28,12 +29,12 @@ class SummonerRepository():
         summoner = summoner_name
         if summoner[8:] != 'del':
             summoner = summoner.replace('','%20')
-        request_url = f'https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{summoner}/{tagline}'
+        request_url = f'https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{summoner}/{tagline}?api_key='
         result = requests.get(request_url, headers=headers)
+        print(result)
         result.raise_for_status()
         summoner_account = result.json()
         return summoner_account['puuid']
-    
     
     def get_summoner_match(self, puuid: str) -> List[str]: #player_name -> player의 match_id return
         requests_url = f"https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?start={0}&count={100}"
@@ -82,13 +83,15 @@ class SummonerRepository():
             return {'success': False, 'message': 'Document not found'}
         
     def check_match_in_db(self, match_id: str):
-        collection_name = self.db.match
-        result = collection_name.find({'matchId': match_id})
-        result_list = list(result)
-        if len(result_list):
-            return True
+        collection_name = self.db['match']
+
+        if collection_name.find_one({'matchId': match_id}):
+            return {'success': True}
+
         else:
-            return False
+            # 데이터베이스 연결이 정상적으로 이루어지지 않은 경우를 처리합니다.
+            print("Database connection failed.")
+            return {'success': False}
 
     def get_summoner_from_db(self, match_id: str, puuid: str):
         collection_name = self.db[puuid]
@@ -104,4 +107,3 @@ class SummonerRepository():
         if result:
             result['_id'] = str(result['_id'])
         return result
-

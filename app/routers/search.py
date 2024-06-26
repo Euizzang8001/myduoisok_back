@@ -22,6 +22,7 @@ async def get_summoner_puuid(summoner_and_tagline: str, service: SummonerService
     result = service.get_summoner_puuid(summoner_and_tagline = summoner_and_tagline)
     return result
 
+
 @router.get('/get-matchid') #puuid -> matchid list return
 async def get_summoner_matchid(summoner_puuid:str, service: SummonerService=Depends()):
     result = service.get_match(summoner_puuid)
